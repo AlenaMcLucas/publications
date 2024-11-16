@@ -1,0 +1,20 @@
+# mac
+**.DS_Store
+
+# jupyter
+**.ipynb_checkpoints
+
+# R
+**.Rproj.user
+**.Rhistory
+**.RData
+
+# latex
+**.aux
+**.log
+**.synctex.gz
+**.pdf
+
+# extra files
+**/img
+**/data
