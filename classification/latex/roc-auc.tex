@@ -1,0 +1,54 @@
+\documentclass[preview]{standalone}
+
+\usepackage{xcolor}
+\pagecolor{white}
+\usepackage{relsize}
+\usepackage[none]{hyphenat}
+
+\begin{document}
+1. Calculate the True Positive Rate (i.e. Recall) and False Positive Rate.
+{\Large
+\[
+TPR=\frac{TP}{TP+FN}
+\]
+}
+{\Large
+\[
+FPR=\frac{FP}{FP+TN}
+\]
+}
+2. For various decision thresholds $t$ (from 0 to 1 because they are rates), calculate True Positive and False Positive Rates to plot.
+{\Large
+\[
+ROC~TP=\sum^N_{i=1}1(\hat{y}_{i,k}\geq t\land y_{i,k}=1)
+\]
+}
+{\Large
+\[
+ROC~FP=\sum^N_{i=1}1(\hat{y}_{i,k}\geq t\land y_{i,k}=0)
+\]
+}
+where:
+\begin{itemize}
+	\setlength\itemsep{0.1em}
+	\item $N$ is the number of test cases
+	\item $1()$ is an indicator function
+	\item $\hat{y}_{i,k}$ is the predicted probability that the case $i$ is the class $k$
+	\item $y_{i,k}$ is a binary indicator that is 1 if the actual class for the case is $k$ and 0 otherwise
+\end{itemize}
+3. Plot these points from Step 2 with the ROC's FPR on the x-axis and the ROC's TPR on the y-axis to graph the curve. It's helpful to include a line from $(0,0)$ to $(1,1)$ to represent random chance.\\
+4. Calculate AUC using the ROC curve.
+{\Large
+\[
+AUC_k=\int^1_0 TP(FP)d(FP)
+\]
+}
+where:
+\begin{itemize}
+	\setlength\itemsep{0.1em}
+	\item the integral is calculating the total area under the ROC curve
+	\item $TP(FP)$ is the output from the ROC curve, and in this context captures the height of the area under the curve
+	\item $d(FP)$ is the differential of the ROC's FP, and in this context captures the width of the area under the curve
+\end{itemize}
+5. As with other metrics, there is also the option to calculate micro or macro averages across classes for both the ROC curve and AUC.
+\end{document}

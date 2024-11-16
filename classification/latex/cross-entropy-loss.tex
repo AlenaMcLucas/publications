@@ -1,0 +1,23 @@
+\documentclass[preview]{standalone}
+
+\usepackage{xcolor}
+\pagecolor{white}
+\usepackage{relsize}
+\usepackage[none]{hyphenat}
+\usepackage{amsmath}
+
+\begin{document}
+{\large
+\[
+\text{Cross-Entropy Loss}=-\frac{1}{N}\sum^N_{i=1}\sum^K_{k=1}y_{i,k}log(\hat{y}_{i,k})
+\]
+}
+where:
+\begin{itemize}
+	\setlength\itemsep{0.1em}
+	\item N is the number of test cases
+	\item K is the number of classes
+	\item $y_{i,k}$ is a binary indicator that is 1 if the actual class for the case is $k$ and 0 otherwise
+	\item $\hat{y}_{i,k}$ is the predicted probability that the case $i$ is the class $k$
+\end{itemize}
+\end{document}

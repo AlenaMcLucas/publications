@@ -1,0 +1,28 @@
+\documentclass[preview]{standalone}
+
+\usepackage{xcolor}
+\pagecolor{white}
+\usepackage{relsize}
+\usepackage[none]{hyphenat}
+\usepackage{amsmath}
+
+\begin{document}
+Step 1: Calculate the observed agreement.
+{\Large
+\[
+p_o=\frac{\text{Total agreements}}{\text{Total cases}}
+\]
+}
+Step 2: Calculate the expected agreement.
+{\large
+\[
+p_e=\sum\left(\frac{\text{Row total for class}_i\times\text{Column total for class}_i}{\text{Total cases}^2}\right)
+\]
+}
+Step 3: Calculate Cohen's Kappa.
+{\Large
+\[
+\kappa=\frac{p_o-p_e}{1-p_e}
+\]
+}
+\end{document}
