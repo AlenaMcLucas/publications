@@ -1,0 +1,22 @@
+\documentclass[preview]{standalone}
+
+\usepackage{xcolor}
+\pagecolor{white}
+\usepackage{relsize}
+\usepackage[none]{hyphenat}
+
+\begin{document}
+{\Large
+\[
+W=\frac{(\sum^n_{i=1}a_ix_{(i)})^2}{\sum^n_{i=1}(x_i-\bar{x})^2}
+\]
+}
+where:
+\begin{itemize}
+	\setlength\itemsep{0.1em}
+	\item $x_{(i)}$ are sample values sorted in ascending order
+	\item $\bar{x}$ is the sample mean
+	\item $a_i$ are weights derived from expected values of the order statistics of a normal distribution. These weights are usually precomputed and depend on sample size.
+	\item $n$ is the sample size
+\end{itemize}
+\end{document}

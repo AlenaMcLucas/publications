@@ -1,0 +1,23 @@
+\documentclass[preview]{standalone}
+
+\usepackage{xcolor}
+\pagecolor{white}
+\usepackage{relsize}
+
+\begin{document}
+Step 1: Estimate the population mean $\hat{\mu}$ and standard deviation $\hat{\sigma}$.\\
+Step 2: Standardize the sample data: $Z_i=\frac{X_i-\hat{\mu}}{\hat{\sigma}}$.\\
+Step 3. Calculate the Lilliefors test statistic after sorting the sample in ascending order.
+{\Large
+\[
+D_n=max|F_n(Z_i)-F(Z_i)|
+\]
+}
+where:
+\begin{itemize}
+	\setlength\itemsep{0.1em}
+	\item $F_n(Z_i)$ is the EDF
+	\item $F(Z_i)$ is the normal CDF computed with the estimated parameters
+\end{itemize}
+This is the same test statistic formula as the Kolmogorov-Smirnov test, but the critical values for determining significance are different because of the estimated parameters.
+\end{document}

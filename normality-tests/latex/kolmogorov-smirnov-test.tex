@@ -1,0 +1,37 @@
+\documentclass[preview]{standalone}
+
+\usepackage{xcolor}
+\pagecolor{white}
+\usepackage{relsize}
+\usepackage[none]{hyphenat}
+
+\begin{document}
+Step 1: Calculate the EDF, which is a step function that estimates the cumulative distribution of a sample.
+{\Large
+\[
+EDF=F_n(x)=\frac{1}{n}\sum^n_{i=1}I(X_i\le x)
+\]
+}
+where:
+\begin{itemize}
+	\setlength\itemsep{0.1em}
+	\item $I(X_i\le x)$ is the indicator function that is 1 if the sample is less than or equal to $x$ and 0 otherwise
+	\item $n$ is the sample size
+\end{itemize}
+Step 2: Calculate the Kolmogorov-Smirnov test statistic:
+{\Large
+\[
+D_n=sup_x|F_n(x)-F(x)|
+\]
+}
+where:
+\begin{itemize}
+	\setlength\itemsep{0.1em}
+	\item $F_n(x)$ is the EDF
+	\item $F(x)$ is the reference CDF
+	\item $sup_x$ is the supremum, or in this case, the maximum absolute difference across all values of $x$
+\end{itemize}
+This test statistic measures the maximum absolute difference between the empirical distribution $F_n(x)$ and the reference cumulative distribution $F(x)$.
+\\\\
+These steps calculate the raw test statistic, but you may also come across the normalized version $D^*_n=\sqrt{n}D_n$.
+\end{document}

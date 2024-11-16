@@ -1,0 +1,31 @@
+\documentclass[preview]{standalone}
+
+\usepackage{xcolor}
+\pagecolor{white}
+\usepackage{relsize}
+\usepackage[none]{hyphenat}
+
+\begin{document}
+{\Large
+\[
+A^2=-n-\frac{1}{n}\sum^n_{i=1}((2i-1)(lnF(x_i)+ln(1-F(x_{n+1-i}))))
+\]
+}
+where:
+\begin{itemize}
+	\setlength\itemsep{0.1em}
+	\item $x_{(i)}$are sample values sorted in ascending order
+	\item $F(x_i)$ is the CDF for normality at the ordered point $x_i$
+	\item $F(x_{n+1-i})$ is the complement CDF from the ordered point $x_i$
+	\item $(2i-1)$ gives more weight to the distribution tails
+	\item $n$ is the sample size
+\end{itemize}
+Notice this test statistic sums CDF values with their complements and uses natural logarithms, which is how it gives more weight to the distribution's tails.
+\\\\
+There is also an adjusted test statistic for smaller sample sizes:
+{\Large
+\[
+A^2_{adjusted}=A^2\left(1+\frac{0.75}{n}+\frac{2.25}{n^2}\right)
+\]
+}
+\end{document}

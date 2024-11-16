@@ -1,0 +1,41 @@
+\documentclass[preview]{standalone}
+
+\usepackage{xcolor}
+\pagecolor{white}
+\usepackage{relsize}
+\usepackage[none]{hyphenat}
+
+\begin{document}
+Step 1: Calculate sample skewness $S$.
+{\Large
+\[
+S=\frac{1}{n}\sum^n_{i=1} \left(\frac{x_i-\bar{x}}{s}\right)^3
+\]
+}
+where:
+\begin{itemize}
+	\setlength\itemsep{0.1em}
+	\item $\bar{x}$ is the sample mean
+	\item $s$ is the sample standard deviation
+	\item $n$ is the sample size
+\end{itemize}
+Step 2: Calculate sample kurtosis $K$.
+{\Large
+\[
+K=\frac{1}{n}\sum^n_{i=1} \left(\frac{x_i-\bar{x}}{s}\right)^4
+\]
+}
+Step 3: Calculate the Jarque-Bera test statistic.
+{\Large
+\[
+JB=\frac{n}{6}\left(S^2+\frac{(K-3)^2}{4}\right)
+\]
+}
+where:
+\begin{itemize}
+	\setlength\itemsep{0.1em}
+	\item $S^2$ is the skewness term
+	\item $(K-3)^2$ is the kurtosis term, measuring any difference from 3
+\end{itemize}
+Squaring these terms ensures that negative and positive skewness or kurtosis both contribute equally.
+\end{document}
