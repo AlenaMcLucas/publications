@@ -1,0 +1,22 @@
+\documentclass[preview]{standalone}
+
+\usepackage{xcolor}
+\pagecolor{white}
+\usepackage{relsize}
+\usepackage[none]{hyphenat}
+\usepackage{amsmath}
+
+\begin{document}
+{\large
+\[
+d_H(p,q)=\sum^n_{i=1}I(p_i\neq q_i)
+\]
+}
+where:
+\begin{itemize}
+	\setlength\itemsep{0.1em}
+	\item $p_i$ and $q_i$ are two vectors of equal length
+	\item $I(p_i\neq q_i)$ is an indicator function that equals 0 if values match and 1 if they do not
+\end{itemize}
+You may also see a normalized version that multiplies Hamming distance by $\frac{1}{n}$. This results in a range $[0,1]$, which improves comparability between datasets with varying lengths and quantifies a percent match.
+\end{document}
