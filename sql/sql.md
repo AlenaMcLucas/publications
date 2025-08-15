@@ -219,55 +219,176 @@ SELECT name,
   END AS salary_group
 FROM employees;
 ```
-- `COALESCE(*col*[, ...])`: Returns the first non-null value in a list.
-- `NULLIF(*col1*, *col1*)`: Returns null if col1 equals col2; otherwise it returns col1.
-- `GREATEST()`: ...
-- `LEAST()`: ...
+- `COALESCE(col1, col2...)`: Returns the first non-null value in a list.
+- `NULLIF(col1, col1)`: Returns null if col1 equals col2; otherwise it returns col1.
+- `GREATEST(col1, col2...)`: Returns the largest non-null value.
+- `LEAST(col1, col2...)`: Returns the smallest non-null value.
 
-## String Functions & Pattern Matching
+## String Functions
+
+- `LENGTH(string)`: Returns the number of characters in a string.
+- `LOWER(string)` / `UPPER(string)`: Converts all characters to lower or upper case.
+- `TRIM([LEADING | TRAILING | BOTH] [string] FROM string)`: Removes leading/trailing characters (default is whitespace).
+  - `TRIM('  hello  ')` --> 'hello'
+  - `TRIM(BOTH 'x' FROM 'xTomxx')` --> 'Tom'
+- `CONCAT(string1, string2, ...)` or `||`: Joins multiple strings together. Is null-safe so it ignores nulls.
+- `REVERSE(string)`: Return reversed string.
+
+### Pattern Matching
+
+There are three separate approaches to pattern matching: the traditional `LIKE` operator, the more recent `SIMILAR TO` operator, and POSIX-style regular expressions.
+
+#### Pattern Matching Functions
+
+- `STARTS_WITH(string, substring)` or `^@`: Returns true if string starts with prefix. `'alphabet' ^@ 'alph'` --> true
+- Position: Returns first starting index of the specified substring within string, or zero if it's not present.
+  - `POSITION(substring IN string)`: `position('om' IN 'Thomas')` --> 3
+  - `STRPOS(string, substring)`: `STRPOS('high', 'ig')` --> 2
+- `REPLACE(string, from string, to string)`: Replace all occurrences in string of substring from with substring to `REPLACE('abcdefabcdef', 'cd', 'XX')` --> `abXXefabXXef`
+
+#### SQL Regular Expressions
+
+##### `LIKE`
+
+- Wildcards: `%` for any sequence of characters zero or more, `_` for a single character
+- `ESCAPE`: `'50%' LIKE '50\%' ESCAPE '\'` --> true
 
 - `LIKE` / `ILIKE`: Simple wildcard pattern matching
-    - `LIKE`: case-sensitive (case matters)
-    - `ILIKE`: case-insensitive (case doesn't matter)
-    - `%` for any sequence of characters, `_` for a single char
-- `~*`: Case-insensitive POSIX regular expression match. `WHERE email ~* '^[a-z0-9._%+-]+@gmail\.com$'`
-    - MORE TO LEARN ON POSIX REGULAR EXPRESSION
-- S`IMILAR TO`: Advanced pattern matching using regex. `WHERE code SIMILAR TO '[A-Z]{2}[0-9]{4}'`
-    - MORE TO LEARN ON SQL REGULAR EXPRESSION
+  - `LIKE` or `~~`: case-sensitive (case matters)
+  - `ILIKE` or `~~*`: case-insensitive (case doesn't matter)
+  - Preceed either with `NOT` to look for rows without matches the pattern.
+    - `!~~` is equivalent to `NOT LIKE`
+    - `!~~*` is equivalent to `NOT ILIKE`
+
+##### `SIMILAR TO`
+
+- `SIMILAR TO`: Advanced pattern matching using regex. `WHERE code SIMILAR TO '[A-Z]{2}[0-9]{4}'`
+- Also has wildcards and `ESCAPE`
+- Adds POSIX-like features
+  - Alternation `(pattern1|pattern2)` matches either pattern1 or pattern2 at that position in the string: `'cat' SIMILAR TO '(dog|cat|mouse)'` --> true
+  - Character classes `[abc]` or `[a-z]` matches exactly one character from the listed set or range: `'bat' SIMILAR TO 'b[aeiou]t'` --> true
+  - Negated classes `[^abc]` or `[^a-z]` matches exactly one character not in the listed set or range: `'bat' SIMILAR TO 'b[^aeiou]t'` --> false
+  - Quantifiers `{m}`, `{m,}`, `{m,n}` match the preceding element exactly m times, at least m times, or between m and n times, respectively: `'haa' SIMILAR TO 'ha{2}'`, `'haa' SIMILAR TO 'ha{2,}'`, `'haa' SIMILAR TO 'ha{1,2}'` --> true
+
+- Examples
+  - `'abc123' SIMILAR TO '%[0-9]{3}'` --> true (ends with 3 digits)
+  - `'abc123' SIMILAR TO '%(123|456)'` --> true (ends with 123 or 456)
+
+#### POSIX-Style Regular Expressions
+
+##### POSIX Functions
+
+- `REGEXP_LIKE(string, pattern[, flags])`: A boolean function that checks whether a string matches a given POSIX regular expression pattern. `REGEXP_LIKE('Hello World', 'world$', 'i')` --> true
+- `REGEXP_MATCHES(string, pattern[, flags string])`: Return all captured substrings resulting from matching a POSIX regular expression against the string. Pass the `'g'` flag to return all matches. `REGEXP_MATCHES('foobarbequebaz', 'ba.', 'g')` --> `{'bar'} {'baz'}` ### should I represent as an array?
+- `REGEXP_REPLACE(string, pattern, replacement[, flags string])`: Replace substring(s) matching a POSIX regular expression. `REGEXP_REPLACE('Thomas', '.[mN]a.', 'M')` --> `ThM`
+- `REGEXP_COUNT(string, pattern[, start integer[, flags string]])`: Returns the number of times the regular expression pattern matches in the string, starting at the start integer. Matches do not overlap. `REGEXP_COUNT('123456789012', '\d\d\d', 2)` --> 3
+
+##### Pattern Syntax
+
+- POSIX regular expression matches
+  - `~`: Case-sensitive `'Hello' ~ '^H'` --> true
+  - `~*`: Case-insensitive `'MyEmail@GMAIL.com' ~* '^[a-z0-9._%+-]+@gmail\.com$'` --> true
+  - `!~`: Does not match regex (case-sensitive) `'Hello' !~ '^h'` --> true
+  - `!~*`: Does not match regex (case-insensitive) `'Hello' !~* '^h'` --> false
+- Metacharacters
+  - `.`: Any single character (except newline unless n flag is set) `'cat' ~ 'c.t'` --> true
+  - `^`: Start of string `'Postgres' ~ '^Post'` --> true
+  - `$`: End of string `'filename.txt' ~ '\.txt$'` --> true
+  - `[...]`: Character class — matches one char from the set `'bat' ~ 'b[aeiou]t'` --> true
+  - `[^...]`: Negated character class — matches one char not in set `'bit' ~ 'b[^aeiou]t'` --> true ('i' is not a vowel in the class)
+  - `(...)`: Capturing group `REGEXP_MATCHES('abc123', '([a-z]+)([0-9]+)')` --> {'abc','123'}
+  - `(?:...)`: Non-capturing group `REGEXP_MATCHES('abc123', '(?:[a-z]+)([0-9]+)')` --> {'123'}
+- Quantifiers
+  - `*`: 0 or more times. Example pattern: `ba*`. Example matches: `b`, `ba`, `baa`, `baaa`.
+  - `+`: 1 or more times. Example pattern: `ba+`. Example matches: `ba`, `baa`, `baaa`.
+  - `?`: 0 or 1 time. Example pattern: `ba?`. Example matches: `b`, `ba`.
+  - `{m}`: Exactly m times. Example pattern: `a{3}`. Example matches: `aaa`.
+  - `{m,}`: m or more times. Example pattern: `a{2,}`. Example matches: `aa`, `aaa`, `aaaa`, `aaaaa`.
+  - `{m,n}`: Between m and n times. Example pattern: `a{2,4}`. Example matches: `aa`, `aaa`, `aaaa`.
+- Character classes
+  - `[:digit:]`: `[0-9]`
+  - `[:alpha:]`: Letters
+  - `[:alnum:]`: Letters + digits
+  - `[:space:]`: Whitespace
+  - `[:punct:]`: Punctuation
+  - `[:upper:]`: Uppercase letters
+  - `[:lower:]`: Lowercase letters
+  - Example: Match strings containing only uppercase letters `REGEXP_LIKE('HELLO', '^[[:upper:]]+$')` --> true
+- Escapes
+  - `\d`: `[0-9]`
+  - `\s`:	Whitespace
+  - `\w`:	Word characters (letters, digits, underscore)
+  - `\D`, `\S`, `\W`:	Negated forms
+  - Example: Match a word containing letters, digits, or underscores `REGEXP_LIKE('Data_123', '^\w+$')` --> true
+
+##### Flags
+
+- `i`: Case-insensitive
+- `g`: Global (find all matches, not just first)
+- `n`: `.` matches newline
+- `m`: `^` and `$` match start/end of lines as well as whole string
+- `x`: Ignore whitespace and allow comments in pattern
+- Example: `REGEXP_LIKE('The Cat is here', '^cat', 'i')` --> true
+
+#### Substrings
+
 - Substring: Extracts part of a string by pattern or position.
-    - `SUBSTRING(string [FROM int] [FOR int])`: Extract substring from position to position.
-    - `SUBSTRING(string FROM pattern)`: Extract substring matching POSIX regular expression.
-    - `SUBSTRING(string FROM pattern FOR escape)`: Extract substring matching SQL regular expression.
-- `LENGTH(str)`: Returns the number of characters in a string.
-- `LOWER(str)` / `UPPER(str)`: Converts all characters to lower or upper case.
-- `TRIM([LEADING | TRAILING | BOTH] [characters] FROM str)`: Removes leading/trailing characters (default is whitespace). `TRIM('  hello  ')` OR `TRIM(BOTH 'x' FROM 'xTomxx')`
-- `CONCAT(str1, str2, ...)`: Joins multiple strings together. Is null-safe so it ignores nulls.
-- `POSITION(substring IN string)`: `position('om' in 'Thomas')` --> 3 OR `STRPOS('high', 'ig')` --> `2`
-- `REGEXP_MATCHES(string text, pattern text)`: Return all captured substrings resulting from matching a POSIX regular expression against the string. `REGEXP_REPLACE('foobarbequebaz', '(bar)(beque)')` --> `{bar,beque}`
-- `REGEXP_REPLACE(string text, pattern text, replacement text)`: Replace substring(s) matching a POSIX regular expression. `REGEXP_REPLACE('Thomas', '.[mN]a.', 'M')` --> `ThM`
-- `REPLACE(string text, from text, to text)`: Replace all occurrences in string of substring from with substring to `REPLACE('abcdefabcdef', 'cd', 'XX')` --> `abXXefabXXef`
-- `REVERSE(str)`: Return reversed string.
+  - `SUBSTRING(string [FROM int] [FOR int])`: Extract substring from position to position. `SUBSTRING('PostgreSQL Tutorial' FROM 1 FOR 10)` --> 'PostgreSQL'
+  - `SUBSTRING(string FROM pattern)`: Extract substring matching POSIX regular expression. `SUBSTRING('Order ID: 12345' FROM '[0-9]+')` --> '12345'
+  - `SUBSTRING(string FROM pattern FOR escape)`: Extract substring matching SQL regular expression. `SUBSTRING('ABC-123-XYZ' FROM '%#"__#"%' FOR '#')` --> '123'
 
 ## Date/Time Functions and Operators
 
-- `CURRENT_DATE` / `NOW()`: Returns the current date (without time), based on the server's time zone.
-- `CURRENT_TIMESTAMP`: Returns the current date and time (with time zone awareness).
-- `DATE_PART(part, [ts | interval])` / `EXTRACT(part FROM [ts|interval])`: Extracts a specific part (like year, month, day, etc.) from a date or timestamp.
-- `DATE_TRUNC(part, ts)`: Truncates a timestamp to a specified precision (e.g., to the nearest day, month, etc.)
-- Interval arithmetic: Adds or subtracts an interval (like days, months, hours) to/from a date or timestamp.
-    - `'2020-01-01'::date + INTERVAL '1 day'`
-    - `DATE_ADD(ts, interval)` / `DATE_SUBTRACT(ts, interval)`
-        - interval can look like `'1 day'::interval`, ...
-- Making a date/time
-    - `MAKE_DATE(year int, month int, day int)`
-    - `MAKE_INTERVAL([years int [, months int [, weeks int [, days int [, hours int [, mins int [, secs double precision]]]]]]])`
-    - `MAKE_TIME(hour int, min int, sec double precision)`
-    - `MAKE_TIMESTAMP(year int, month int, day int, hour int, min int, sec double precision)`
-        - ADD `TZ` to add a timezone
-    - `DATE '2006-01-02'`
-    - `TIMESTAMP '2001-02-18 20:38:40'`
+### Creation
 
-- NEED LIST OF PARTS. IS IT DIFFERENT FOR INTERVAL ARITHMETIC? INTERVAL?
+- `CURRENT_TIMESTAMP` / `NOW()` --> `2019-12-23 14:39:53.662522-05`: Returns the current date and time (with time zone awareness).
+- `CURRENT_DATE` --> `2019-12-23`: Returns the current date (without time), based on the server's time zone.
+- `CURRENT_TIME` --> `14:39:53.662522-05`: Returns the current time (without date), based on the server's time zone.
+- **Interval**: a data type that represents a duration of time such as days, hours, or months that can be added to or subtracted from timestamps or dates.
+- Shorcuts
+    - `DATE '2006-01-02'` or `'2020-01-01'::date`
+    - `TIMESTAMP '2001-02-18 20:38:40'` or `'2025-08-14 15:30:45'::timestamp`
+    - `TIME '14:30:00'` or `'15:30:45'::time`
+    - `INTERVAL '1 year 2 months 3 days 4 hours 5 minutes 6 seconds'`
+    - `INTERVAL '15 minutes'` or `'1 day'::interval`
+- Making a date, time, interval
+    - `MAKE_DATE(year int, month int, day int)`: `MAKE_DATE(2025, 8, 11)` --> 2025-08-11
+    - `MAKE_INTERVAL([years int [, months int [, weeks int [, days int [, hours int [, mins int [, secs double precision]]]]]]])`: `MAKE_INTERVAL(1, 2, 0, 3)` --> `1 year, 2 months, 0 weeks, 3 days`
+    - `MAKE_TIME(hour int, min int, sec double precision)`: `MAKE_TIME(14, 30, 45.123)` --> 14:30:45.123
+    - `MAKE_TIMESTAMP(year int, month int, day int, hour int, min int, sec double precision)`: `MAKE_TIMESTAMP(2025, 8, 11, 14, 30, 45.123)` --> 2025-08-11 14:30:45.123
+
+### Parts & Extraction
+
+| Type | Name | Meaning |
+| -- | -- | -- |
+| date | `year` | year number |
+| date | `quarter` | quarter of year (1-4) |
+| date | `month` | month of year (1-12) |
+| date | `week` | ISO week number of the year (1-53) |
+| date | `day` | day of the month (1-31) |
+| date | `doy` | day of year (1-365) |
+| date | `dow` | day of week (0-6; Sunday=0) |
+| date | `isodow` | ISO day of week (1-7; Monday=1) |
+| time | `hour` | hour of day (0-23) |
+| time | `minute` | minute of hour (0-59) |
+| time | `second` | seconds, can be fractional |
+| interval | `epoch` | seconds, can be fractional |
+
+- `DATE_PART(part, [ts | interval])` / `EXTRACT(part FROM [ts|interval])`: Extracts a specific part (like year, month, day, etc.) from a date or timestamp. Equivalent examples are:
+  - `DATE_PART('month', TIMESTAMP '2025-08-11 14:35:00')` --> 8
+  - `EXTRACT(MONTH FROM TIMESTAMP '2025-08-11 14:35:00')` --> 8
+- `DATE_TRUNC(part, ts)`: Truncates a timestamp to a specified precision (e.g., to the nearest day, month, etc.) `DATE_TRUNC('month', TIMESTAMP '2025-08-11 15:42:30')` --> 2025-08-01 00:00:00
+
+### Arithmetic
+
+- XXX Need more of the basic math here XXX
+- `DATE_ADD(ts, interval)` / `DATE_SUBTRACT(ts, interval)`
+
+### Intervals
+
+- Interval arithmetic: Adds or subtracts an interval (like days, months, hours) to/from a date or timestamp.
+- Intervals most often result from `timestamp - timestamp` or `time - time`. They can also be added or subtracted from one another, so `interval + interval` or `interval - interval`.
+- Intervals can be added to or subtracted from timestamps, dates, and times.
 
 ## Array Functions, Operations, and Comparisons
 
